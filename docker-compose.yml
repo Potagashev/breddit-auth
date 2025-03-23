@@ -1,0 +1,26 @@
+volumes:
+  postgres_data: {}
+  app_data: {}
+
+services:
+  app:
+    build:
+      context: .
+    depends_on:
+      - db
+    ports:
+      - "8081:8080"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    restart: "unless-stopped"
+  
+  db:
+    image: postgres:15
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    env_file:
+      - .env
