@@ -11,6 +11,7 @@ func NewRouter(AuthHandler *auth.AuthHandler) *gin.Engine {
 	threadRoutes := router.Group("/api/v1/auth")
 	{
 		threadRoutes.POST("/signUp", AuthHandler.SignUp)
+		threadRoutes.POST("/signIn", AuthHandler.SignIn)
 	}
 
 	return router

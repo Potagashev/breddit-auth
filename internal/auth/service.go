@@ -19,7 +19,7 @@ func NewAuthService(userService *users.UserService, cfg *config.Config) *AuthSer
 	return &AuthService{userService: *userService, cfg: *cfg}
 }
 
-func (s *AuthService) SignUp(signUpData *SignUpData) (SignUpResponse, error) {
+func (s *AuthService) SignUp(signUpData *SignUpData) (*SignUpResponse, error) {
 	passwordHash := s.hashPassword(signUpData.Password)
 	userCreateData := users.UserCreate{
 		Username: signUpData.Username,
@@ -28,14 +28,35 @@ func (s *AuthService) SignUp(signUpData *SignUpData) (SignUpResponse, error) {
 	}
 	userId, err := s.userService.CreateUser(&userCreateData)
 	if err != nil {
-		return SignUpResponse{Token: ""}, err
+		return nil, err
 	}
 	
 	token, err := s.generateAuthToken(userId)
 	if err != nil {
-		return SignUpResponse{Token: ""}, err
+		return nil, err
 	}
-	return SignUpResponse{Token: token}, nil
+	return &SignUpResponse{Token: token}, nil
+}
+
+func (s *AuthService) SignIn(signInData *SignInData) (*SignInResponse, error) {
+	user, err := s.userService.GetUserByUsername(signInData.Username)
+	if user == nil {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(signInData.Password))
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := s.generateAuthToken(user.Id)
+	if err != nil {
+		return nil, err
+	}
+	return &SignInResponse{Token: token}, nil
 }
 
 func (s *AuthService) hashPassword(rawPassword string) string {

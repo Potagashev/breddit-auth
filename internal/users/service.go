@@ -13,3 +13,7 @@ func NewUserService(userRepo *UserRepository) *UserService{
 func (s *UserService) CreateUser(createData *UserCreate) (uuid.UUID, error) {
 	return s.userRepo.CreateUser(createData)
 }
+
+func (s *UserService) GetUserByUsername(username string) (*User, error) {
+	return s.userRepo.GetUserByUsername(username)
+}

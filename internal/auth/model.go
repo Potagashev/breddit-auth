@@ -19,3 +19,12 @@ type Claims struct {
     UserId uuid.UUID `json:"userId"`
     jwt.RegisteredClaims
 }
+
+type SignInData struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type SignInResponse struct {
+	Token string `json:"token"`
+}
