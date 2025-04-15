@@ -8,7 +8,7 @@ type UserCreate struct {
 	Email string
 }
 
-type User struct {
+type UserInternal struct {
 	Id uuid.UUID
 	Username string
 	PasswordHash string

@@ -28,3 +28,9 @@ type SignInData struct {
 type SignInResponse struct {
 	Token string `json:"token"`
 }
+
+type VerifyAuthTokenHTTPResponse struct {
+	Id uuid.UUID `json:"id"`
+	Username string `json:"username"`
+	Email string `json:"email"`
+}

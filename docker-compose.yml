@@ -3,20 +3,22 @@ volumes:
   app_data: {}
 
 services:
-  app:
+  app-auth:
     build:
       context: .
     depends_on:
-      - db
+      - db-auth
     ports:
-      - "8081:8080"
+      - "8081:8081"
     volumes:
       - .:/app
     env_file:
       - .env
     restart: "unless-stopped"
+    networks:
+      - breddit
   
-  db:
+  db-auth:
     image: postgres:15
     ports:
       - "5433:5432"
@@ -24,3 +26,11 @@ services:
       - ./postgres-data:/var/lib/postgresql/data
     env_file:
       - .env
+    networks:
+      - breddit
+
+networks:
+  breddit:
+    driver: bridge
+    name: breddit
+    external: true

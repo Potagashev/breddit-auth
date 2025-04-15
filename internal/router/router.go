@@ -12,6 +12,7 @@ func NewRouter(AuthHandler *auth.AuthHandler) *gin.Engine {
 	{
 		threadRoutes.POST("/signUp", AuthHandler.SignUp)
 		threadRoutes.POST("/signIn", AuthHandler.SignIn)
+		threadRoutes.GET("/verify", AuthHandler.VerifyAuthToken)
 	}
 
 	return router

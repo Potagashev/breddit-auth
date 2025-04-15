@@ -3,14 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"net"
 	"os"
 
 	"github.com/jackc/pgx/v5"
+	"google.golang.org/grpc"
 
 	"github.com/Potagashev/breddit_auth/internal/auth"
 	"github.com/Potagashev/breddit_auth/internal/config"
-	"github.com/Potagashev/breddit_auth/internal/users"
 	"github.com/Potagashev/breddit_auth/internal/router"
+	"github.com/Potagashev/breddit_auth/internal/users"
+	authPb "github.com/Potagashev/breddit_auth/internal/auth/proto"
 )
 
 // @title Swagger Example API
@@ -34,6 +38,20 @@ func main() {
 	auth_handler := auth.NewAuthHandler(auth_service)
 
 	r := router.NewRouter(auth_handler)
+
+	listener, err := net.Listen("tcp", ":50051")
+    if err != nil {
+        log.Fatalf("Failed to listen: %v", err)
+    }
+
+    grpcServer := grpc.NewServer()
+
+	authPb.RegisterAuthServiceServer(grpcServer, auth_service)
+
+    log.Println("gRPC server is running on port 50051")
+    if err := grpcServer.Serve(listener); err != nil {
+        log.Fatalf("Failed to serve: %v", err)
+    }
 
 	r.Run(fmt.Sprintf(":%s", cfg.AppPort))
 }

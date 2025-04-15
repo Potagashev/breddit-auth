@@ -47,3 +47,24 @@ func (h *AuthHandler) SignIn(c* gin.Context) {
 
 	c.JSON(http.StatusCreated, responseData)
 }
+
+func (h *AuthHandler) VerifyAuthToken(c* gin.Context) {
+	authHeader := c.GetHeader("Access-Token")
+	if authHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Access-Token header is required"})
+		return
+	}
+	token := authHeader[len("Bearer "):]
+	responseData, err := h.authService.VerifyAuthToken(token)
+	if err != nil {
+		
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if responseData == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, responseData)
+}

@@ -44,7 +44,7 @@ func LoadConfig() (*Config, error) {
 	dbPort := mustGetEnv("DATABASE_PORT")
 	dbUrl := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
 
-	appPort := getEnv("APP_PORT", "8080")
+	appPort := getEnv("APP_PORT", "8081")
 
 	jwtTokenExpMinutes, err := strconv.Atoi(getEnv("JWT_TOKEN_EXP_MINUTES", "60"))
 	if err != nil {

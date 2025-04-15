@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"time"
 
 	"github.com/Potagashev/breddit_auth/internal/config"
@@ -8,9 +9,12 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	pb "github.com/Potagashev/breddit_auth/internal/auth/proto"
 )
 
+
 type AuthService struct {
+    pb.UnimplementedAuthServiceServer
 	userService users.UserService
 	cfg config.Config
 }
@@ -57,6 +61,43 @@ func (s *AuthService) SignIn(signInData *SignInData) (*SignInResponse, error) {
 		return nil, err
 	}
 	return &SignInResponse{Token: token}, nil
+}
+
+func (s *AuthService) VerifyAuthToken(token string) (*VerifyAuthTokenHTTPResponse, error) {
+	claims := &Claims{}
+	parsedToken, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(s.cfg.JWTSecret), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if !parsedToken.Valid {
+		return nil, nil
+	}
+
+	user, err := s.userService.GetUserById(claims.UserId)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, nil
+	}
+
+	return &VerifyAuthTokenHTTPResponse{Id: user.Id, Username: user.Username, Email: user.Email}, nil
+}
+
+func (s *AuthService) VerifyAuthTokenRPC(ctx context.Context, req *pb.VerifyAuthTokenRequest) (*pb.VerifyAuthTokenResponse, error) {
+    // Call the existing VerifyAuthToken method
+    response, err := s.VerifyAuthToken(req.Token)
+    if err != nil {
+        return nil, err
+    }
+
+    return &pb.VerifyAuthTokenResponse{
+        Id:       response.Id.String(),
+        Username: response.Username,
+        Email:    response.Email,
+    }, nil
 }
 
 func (s *AuthService) hashPassword(rawPassword string) string {

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = ".;auth";
+
+service AuthService {
+  rpc VerifyAuthTokenRPC(VerifyAuthTokenRequest) returns (VerifyAuthTokenResponse);
+}
+
+message VerifyAuthTokenRequest {
+  string token = 1;
+}
+
+message VerifyAuthTokenResponse {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+}

@@ -44,8 +44,8 @@ func (r *UserRepository) CreateUser(createData *UserCreate) (uuid.UUID, error) {
 	return userId, nil
 }
 
-func (r *UserRepository) GetUserByUsername(username string) (*User, error) {
-	var user User
+func (r *UserRepository) GetUserByUsername(username string) (*UserInternal, error) {
+	var user UserInternal
 	query := `SELECT id, username, password_hash, email FROM users WHERE username = $1`
 	err := r.DB.QueryRow(
 		context.Background(),
@@ -57,6 +57,24 @@ func (r *UserRepository) GetUserByUsername(username string) (*User, error) {
             // Return nil for both user and error if no rows are found
             return nil, nil
         }
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *UserRepository) GetUserById(id uuid.UUID) (*UserInternal, error) {
+	var user UserInternal
+	query := `SELECT id, username, email FROM users WHERE id = $1`
+	err := r.DB.QueryRow(
+		context.Background(),
+		query,
+		id,
+	).Scan(&user.Id, &user.Username, &user.Email)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// Return nil for both user and error if no rows are found
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &user, nil
